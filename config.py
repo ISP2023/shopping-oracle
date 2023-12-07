@@ -13,6 +13,8 @@ CHECKOUT_CORRUPTS_INVENTORY = 4
 CHECKOUT_DOES_NOT_UPDATE_INVENTORY = 5
 # doesn't empty cart after checkout
 CHECKOUT_NOT_EMPTY_CART = 6
+# can add zero quantity of an item
+ADD_ZERO_QUANTITY_TO_CART = 7
 
 
 def config(envvar, default="", cast=None):

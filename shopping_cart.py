@@ -37,7 +37,9 @@ class ShoppingCart:
                             the quantity would cause the total quantity in the
                             shopping cart to exceed the stock in the store.
         """
-        if not isinstance(quantity, int) or quantity <= 0:
+        if not isinstance(quantity, int) or quantity < 0:
+            raise ValueError("quantity must be positive integer")
+        if quantity == 0 and not bug(ADD_ZERO_QUANTITY_TO_CART):
             raise ValueError("quantity must be positive integer")
         if bug(ADD_NONEXISTENT_PRODUCT):
             stock = 2**30
@@ -45,7 +47,7 @@ class ShoppingCart:
             # will raise exception if product_id not in store
             stock = self.store.get_quantity(product_id)
         if bug(BYPASS_STOCK_LIMIT):
-            # only check _this_ quantity is in stock
+            # only check _this_ quantity is in stock, not total in cart
             total_quantity = quantity
         else:
             # total in cart + new quantity in stock?
@@ -154,6 +156,6 @@ class ShoppingCart:
         # if no exceptions raised, then place the order
         order_id = self.store.place_order(self.cart)
         # after placing an order, empty the cart to avoid duplicate orders
-        if order_id and not bug(CHECKOUT_NOT_EMPTY_CART):
+        if not bug(CHECKOUT_NOT_EMPTY_CART):
             self.cart.clear()
         return order_id
