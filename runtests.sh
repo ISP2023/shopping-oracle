@@ -1,47 +1,51 @@
 #!/bin/bash
 
 TESTMODULE="test_shopping_cart.py"
+PYTHON=python3
+PYTHON=python3.11
 
 if [ ! -f $TESTMODULE ]; then
 	echo "No tests code $TESTMODULE"
 	exit 9
 fi
 
-# arrays to record results. Elements are appended in runtests()
-expect=("")
-actual=("")
-
-# Target and variants
+# Target code for tests
 TARGET=shopping_cart.py
 
 # Path to oracle code
-if [ -d oracle ]; then
-   DIR=oracle
-else
-   DIR=.
+DIR=./oracle
+if [ ! -d $DIR ]; then
+	echo "No oracle code in $DIR"
+	exit 9
 fi
 # Name of instrumented target code
-VARIANT_CODE=$DIR/shopping_cart.py
+VARIANT_CODE=shopping_cart.py
+
+# Backup student's version of target code (restored in cleanup)
+BACKUP=${TARGET}-orig
+
+# Arrays to record results. Elements are appended in runtests()
+expect=("")
+actual=("")
 
 drawline( ) {
     echo "----------------------------------------------------------------------"
 }
 runtests( ) {
-    if [ ! -f $VARIANT_CODE ]; then
+    if [ ! -f $DIR/$VARIANT_CODE ]; then
         echo "No file ${VARIANT_CODE}"
         exit 1
     fi
 	# backup student file
-	BACKUP=${TARGET}-orig
 	if [ ! -f ${BACKUP} ]; then
 		cp $TARGET ${BACKUP}
 	fi
 	# copy oracle's code
 	if [ "$DIR" != "." ]; then
-    	cp $VARIANT_CODE $TARGET
+    	cp $DIR/$VARIANT_CODE $TARGET
 		cp $DIR/config.py .
 	fi
-	for testcase in 0 1 2 3 4 5 6; do
+	for testcase in 0 1 2 3 4 5 6 7 8; do
         echo ""
         drawline
 		case $testcase in
@@ -57,9 +61,9 @@ runtests( ) {
 			;;
 		esac
         drawline
-		echo export TESTCASE=$testcase
+		#echo export TESTCASE=$testcase
 		export TESTCASE=$testcase
-		python3 -m unittest -v $TESTMODULE
+		$PYTHON -m unittest -v $TESTMODULE
 		# record status
 		if [ $? -eq 0 ]; then
 			actual[$testcase]="OK"
@@ -69,6 +73,13 @@ runtests( ) {
 		# wait til user presses enter?
 		#read input
 	done
+}
+
+cleanup() {
+	if [ -f $BACKUP ]; then
+		/bin/mv $BACKUP $TARGET
+	fi
+	/bin/rm -f config.py
 }
 
 showresults() {
@@ -83,8 +94,7 @@ showresults() {
     # is element 0 used?
 	#numtests=$(($numtests - 1))
     
-	#for testcase in ${!expect[@]}; do
-	for testcase in 0 1 2 3 4 5 6; do
+	for testcase in ${!expect[@]}; do
         # no results in element 0
         #if [ $testcase -eq 0 ]; then continue; fi
         printf "%4d      %-4s     %s\n" ${testcase} ${expect[$testcase]} ${actual[$testcase]}
@@ -98,4 +108,5 @@ showresults() {
 }
 
 runtests
+cleanup
 showresults

@@ -44,7 +44,7 @@ class ShoppingCart:
         if bug(ADD_NONEXISTENT_PRODUCT):
             stock = 2**30
         else:
-            # will raise exception if product_id not in store
+            # will raise exception if product_id not in the store
             stock = self.store.get_quantity(product_id)
         if bug(BYPASS_STOCK_LIMIT):
             # only check _this_ quantity is in stock, not total in cart
@@ -82,6 +82,9 @@ class ShoppingCart:
         self.cart[product_id] -= quantity
         # If remaining quantity is 0 then remove item from cart.
         if self.cart[product_id] == 0:
+            del self.cart[product_id]
+        # Programmer always removes item from cart
+        elif bug(ALWAYS_REMOVE_ENTIRE_ITEM_FROM_CART):
             del self.cart[product_id]
 
     def get_items(self) -> dict[int, int]:
@@ -140,22 +143,23 @@ class ShoppingCart:
             inventory of any items in the shopping cart.
         :raises ValueError: if some product_id in the cart is not a current Product
         """
+        order_items = self.cart.items()
         if not bug(CHECKOUT_CORRUPTS_INVENTORY):
-            # verify stock quantities before updating inventory (correct)
-            for (product_id, quantity) in self.cart.items():
+            # should verify stock quantities before updating inventory
+            for (product_id, quantity) in order_items:
                 qnty_in_stock = self.store.get_quantity(product_id)
                 if quantity > qnty_in_stock:
                     # exceeds inventory
                     raise InventoryError(
                         f"Product {product_id} in-stock {qnty_in_stock} < in-cart {quantity}")
-            # update the store's inventory
-            if not bug(CHECKOUT_DOES_NOT_UPDATE_INVENTORY):
-                for (product_id, quantity) in self.cart.items():
-                    self.store.add_stock(product_id, -quantity)
+        # update the store's inventory
+        if not bug(CHECKOUT_DOES_NOT_UPDATE_INVENTORY):
+            for (product_id, quantity) in order_items:
+                self.store.add_stock(product_id, -quantity)
 
         # if no exceptions raised, then place the order
         order_id = self.store.place_order(self.cart)
         # after placing an order, empty the cart to avoid duplicate orders
-        if not bug(CHECKOUT_NOT_EMPTY_CART):
+        if not bug(CHECKOUT_NEVER_EMPTIES_CART):
             self.cart.clear()
         return order_id
