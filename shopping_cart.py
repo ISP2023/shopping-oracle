@@ -82,7 +82,8 @@ class ShoppingCart:
         self.cart[product_id] -= quantity
         # If remaining quantity is 0 then remove item from cart.
         if self.cart[product_id] == 0:
-            del self.cart[product_id]
+            if not bug(NEVER_REMOVE_PRODUCT_ID_FROM_CART):
+                del self.cart[product_id]
         # Programmer always removes item from cart
         elif bug(ALWAYS_REMOVE_ENTIRE_ITEM_FROM_CART):
             del self.cart[product_id]
@@ -144,8 +145,8 @@ class ShoppingCart:
         :raises ValueError: if some product_id in the cart is not a current Product
         """
         order_items = self.cart.items()
+        # Verify stock quantities are sufficient to fulfull order
         if not bug(CHECKOUT_CORRUPTS_INVENTORY):
-            # should verify stock quantities before updating inventory
             for (product_id, quantity) in order_items:
                 qnty_in_stock = self.store.get_quantity(product_id)
                 if quantity > qnty_in_stock:
@@ -153,6 +154,7 @@ class ShoppingCart:
                     raise InventoryError(
                         f"Product {product_id} in-stock {qnty_in_stock} < in-cart {quantity}")
         # update the store's inventory
+        # If you do not verify stock in advance, this may raise Exception
         if not bug(CHECKOUT_DOES_NOT_UPDATE_INVENTORY):
             for (product_id, quantity) in order_items:
                 self.store.add_stock(product_id, -quantity)

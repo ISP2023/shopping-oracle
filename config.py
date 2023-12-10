@@ -5,20 +5,20 @@ import os
 BYPASS_STOCK_LIMIT = 1
 # can add product id of non-existing product to cart
 ADD_NONEXISTENT_PRODUCT = 2
-# can remove quantity greater than in the cart
-REMOVE_QUANTITY_EXCEEDS_CART = 3
-# checkout modifies inventory before checking all items have enough stock
-CHECKOUT_CORRUPTS_INVENTORY = 4
-# checkout never updates the store's inventory
-CHECKOUT_DOES_NOT_UPDATE_INVENTORY = 5
-# doesn't empty cart after checkout
-CHECKOUT_NEVER_EMPTIES_CART = 6
 # can add zero quantity of an item
-ADD_ZERO_QUANTITY_TO_CART = 7
-# if customer reduces quantity of an item, the entire item is removed
-ALWAYS_REMOVE_ENTIRE_ITEM_FROM_CART = 8
-
-
+ADD_ZERO_QUANTITY_TO_CART = 3
+# can remove quantity greater than in the cart
+REMOVE_QUANTITY_EXCEEDS_CART = 4
+# if customer removes units of an item, the entire item is removed from cart
+ALWAYS_REMOVE_ENTIRE_ITEM_FROM_CART = 5
+# if customer removes all units of an item, the product_id is still in cart
+NEVER_REMOVE_PRODUCT_ID_FROM_CART = 6
+# checkout modifies inventory before checking all items have sufficient stock
+CHECKOUT_CORRUPTS_INVENTORY = 7
+# checkout never updates the store's inventory
+CHECKOUT_DOES_NOT_UPDATE_INVENTORY = 8
+# doesn't empty cart after checkout
+CHECKOUT_NEVER_EMPTIES_CART = 9
 
 
 def config(envvar, default="", cast=None):
