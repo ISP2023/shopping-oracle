@@ -47,7 +47,7 @@ runtests( ) {
     	cp $DIR/$VARIANT_CODE $TARGET
 		cp $DIR/config.py .
 	fi
-	for testcase in 0 1 2 3 4 5 6 7 8 9; do
+	for testcase in 0 1 2 3 4 5 6 7 8 9 10; do
         echo ""
         drawline
 		case $testcase in
@@ -63,7 +63,6 @@ runtests( ) {
 			;;
 		esac
         drawline
-		#echo export TESTCASE=$testcase
 		export TESTCASE=$testcase
 		$PYTHON -m unittest -v $TESTMODULE
 		# record status
@@ -72,8 +71,11 @@ runtests( ) {
 		else
 			actual[$testcase]="FAIL"
 		fi
+		echo export TESTCASE=$testcase
 		# wait til user presses enter?
-		#read input
+		if [ $TESTCASE -eq 999 ]; then
+			read input
+		fi
 	done
 }
 

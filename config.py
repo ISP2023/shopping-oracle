@@ -19,6 +19,8 @@ CHECKOUT_CORRUPTS_INVENTORY = 7
 CHECKOUT_DOES_NOT_UPDATE_INVENTORY = 8
 # doesn't empty cart after checkout
 CHECKOUT_NEVER_EMPTIES_CART = 9
+# checkout always empties the cart, even if checkout fails
+CHECKOUT_ALWAYS_EMPTIES_CART = 10
 
 
 def config(envvar, default="", cast=None):

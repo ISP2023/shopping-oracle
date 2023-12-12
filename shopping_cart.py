@@ -145,14 +145,22 @@ class ShoppingCart:
         :raises ValueError: if some product_id in the cart is not a current Product
         """
         order_items = self.cart.items()
+        # Cannot checkout an empty cart
+        if len(order_items) == 0:
+            raise ValueError("Cannot checkout an empty shopping cart.")
         # Verify stock quantities are sufficient to fulfull order
         if not bug(CHECKOUT_CORRUPTS_INVENTORY):
-            for (product_id, quantity) in order_items:
-                qnty_in_stock = self.store.get_quantity(product_id)
-                if quantity > qnty_in_stock:
-                    # exceeds inventory
-                    raise InventoryError(
+            try:
+                for (product_id, quantity) in order_items:
+                    qnty_in_stock = self.store.get_quantity(product_id)
+                    if quantity > qnty_in_stock:
+                        # exceeds inventory
+                        raise InventoryError(
                         f"Product {product_id} in-stock {qnty_in_stock} < in-cart {quantity}")
+            except (ValueError, InventoryError) as ex:
+                if bug(CHECKOUT_ALWAYS_EMPTIES_CART):
+                   self.cart.clear()
+                raise ex
         # update the store's inventory
         # If you do not verify stock in advance, this may raise Exception
         if not bug(CHECKOUT_DOES_NOT_UPDATE_INVENTORY):
